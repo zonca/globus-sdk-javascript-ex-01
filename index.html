@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@globus/sdk Demo</title>
+    <script src="https://unpkg.com/@globus/sdk/umd/globus.production.js"></script>
+  </head>
+  <body>
+    <h1>@globus/sdk</h1>
+    <button id="sign-in" style="display: none">Sign In</button>
+    <button id="sign-out"  style="display: none">Sign Out</button>
+    <code><pre id="user-information"></pre></code>
+    <script>
+      /**
+       * Adds some basic logging configuration for the SDK.
+       * This is not required, but can be helpful for debugging.
+       */
+      globus.logger.setLogger(console);
+      globus.logger.setLogLevel('DEBUG');
+      /**
+       * This will create an AuthorizationManager that will track your authorization state.
+       * - Stored in localStorage by default.
+       */
+      const manager = globus.authorization.create({
+        /**
+         * Your registered Globus Application client ID.
+         */
+        client: '938f3dce-6782-40e7-872d-2ef94c7b24e7',
+        /**
+         * The redirect URL for your application.
+         * This URL should also be added to your Globus Application configuration.
+         */
+        redirect: 'https://joe.bottigliero.com/globus-sdk-javascript-ex-01/',
+        /**
+         * @todo - This uncovered a bug where you need to define at least one scope, I'll get this fixed so you can remove it!
+         */
+        scopes: 'urn:globus:auth:scope:transfer.api.globus.org:all',
+        /**
+         * This will enable the use of refresh tokens - you probably want this!
+         */ 
+        useRefreshTokens: true,
+      });
+      /**
+       * This will handle the `code` redirect and ensure the `manager` represents the authentication state.
+       * The call to `handleCodeRedirect` should be where your `redirect` is set to.
+       */
+      manager.handleCodeRedirect();
+      /**
+       * Basic UI to demonstrate the SDK.
+       */
+      const UI = {
+        SIGN_IN: document.getElementById('sign-in'),
+        SIGN_OUT: document.getElementById('sign-out'),
+        USER_INFO: document.getElementById('user-information'),
+      };
+
+      UI.SIGN_IN.addEventListener('click', () => {
+        /**
+         * This will redirect the user to the Globus Auth login page.
+         */
+        manager.login();
+      });
+
+      UI.SIGN_OUT.addEventListener('click', () => {
+        /**
+         * This will revoke the user's tokens and clear the stored state.
+         */
+        manager.revoke();
+        // 
+        UI.USER_INFO.innerText = '';
+        UI.SIGN_IN.style.display = 'block';
+        UI.SIGN_OUT.style.display = 'none';
+      });
+      if (manager.authenticated) {
+        UI.USER_INFO.innerText = JSON.stringify(manager.user, null, 2);
+        UI.SIGN_OUT.style.display = 'block';
+      } else {
+        UI.SIGN_IN.style.display = 'block';
+      }
+    </script>
+  </body>
+</html>
