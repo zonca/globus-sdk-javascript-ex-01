@@ -5,13 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@globus/sdk Demo</title>
     <script src="https://unpkg.com/@globus/sdk/umd/globus.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <h1>@globus/sdk</h1>
+    <p>This page demonstrates how to incorporate a <a href="https://g-062a3c.0ed28.75bc.data.globus.org/allusers/data.json">JSON file</a>
+      <a href="https://app.globus.org/file-manager?origin_id=385d3079-5121-40bc-a52f-055296497631&destination_path=%2Fallusers%2F">hosted in a Globus Guest Collection</a> with restricted access. You will need to 
+      <a href="https://app.globus.org/groups/260da91f-3496-11ed-b941-972795fc9504/join">join the Serverless Data Users Globus Group</a> to view the sample chart.</p>
     <button id="sign-in" style="display: none">Sign In</button>
     <button id="sign-out"  style="display: none">Sign Out</button>
     <code><pre id="user-information"></pre></code>
+    <div id="canvas">
+      <h2>Sample Chart with Restricted Data</h2>
+      <p>Plotted using <a href="https://www.chartjs.org/docs/latest/getting-started/">Chart.js</a>.
+      <canvas id="chart"></canvas>
+    </div>
+
     <script>
+      /* Collection with the restricted data */
+      const collection = '385d3079-5121-40bc-a52f-055296497631';
+      const client_id = 'f42cc8a6-a1f1-4e75-90e1-612febbb9e7f';
+      const data_url = 'https://g-062a3c.0ed28.75bc.data.globus.org/allusers/data.json';
       /**
        * Adds some basic logging configuration for the SDK.
        * This is not required, but can be helpful for debugging.
@@ -23,23 +37,23 @@
        * - Stored in localStorage by default.
        */
       const manager = globus.authorization.create({
-        /**
-         * Your registered Globus Application client ID.
-         */
-        client: '938f3dce-6782-40e7-872d-2ef94c7b24e7',
-        /**
-         * The redirect URL for your application.
-         * This URL should also be added to your Globus Application configuration.
-         */
-        redirect: 'https://joe.bottigliero.com/globus-sdk-javascript-ex-01/',
-        /**
-         * @todo - This uncovered a bug where you need to define at least one scope, I'll get this fixed so you can remove it!
-         */
-        scopes: 'urn:globus:auth:scope:transfer.api.globus.org:all',
-        /**
-         * This will enable the use of refresh tokens - you probably want this!
-         */ 
-        useRefreshTokens: true,
+          /**
+           * Your registered Globus Application client ID.
+           */
+          client: client_id,
+          /**
+           * The redirect URL for your application.
+           * This URL should also be added to your Globus Application configuration.
+           */
+          redirect: 'http://rpwagner.github.io/globus-sdk-javascript-ex-01/',
+          /**
+           * @todo - This uncovered a bug where you need to define at least one scope, I'll get this fixed so you can remove it!
+           */
+          scopes: `openid profile email https://auth.globus.org/scopes/${collection}/https`,
+          /**
+           * This will enable the use of refresh tokens - you probably want this!
+           */ 
+          useRefreshTokens: true,
       });
       /**
        * This will handle the `code` redirect and ensure the `manager` represents the authentication state.
@@ -50,33 +64,79 @@
        * Basic UI to demonstrate the SDK.
        */
       const UI = {
-        SIGN_IN: document.getElementById('sign-in'),
-        SIGN_OUT: document.getElementById('sign-out'),
-        USER_INFO: document.getElementById('user-information'),
+          SIGN_IN: document.getElementById('sign-in'),
+          SIGN_OUT: document.getElementById('sign-out'),
+          USER_INFO: document.getElementById('user-information'),
+	  CANVAS: document.getElementById('canvas'),
+	  CHART: document.getElementById('chart'),
       };
 
       UI.SIGN_IN.addEventListener('click', () => {
-        /**
-         * This will redirect the user to the Globus Auth login page.
-         */
-        manager.login();
+          /**
+           * This will redirect the user to the Globus Auth login page.
+           */
+          manager.login();
       });
 
       UI.SIGN_OUT.addEventListener('click', () => {
-        /**
-         * This will revoke the user's tokens and clear the stored state.
-         */
-        manager.revoke();
-        // 
-        UI.USER_INFO.innerText = '';
-        UI.SIGN_IN.style.display = 'block';
-        UI.SIGN_OUT.style.display = 'none';
+          /**
+           * This will revoke the user's tokens and clear the stored state.
+           */
+          manager.revoke();
+          // 
+          UI.USER_INFO.innerText = '';
+          UI.CHART.style.display = 'none';
+	  UI.CANVAS.style.display = 'none';
+          UI.SIGN_OUT.style.display = 'none';
+	  UI.SIGN_IN.style.display = 'block';
       });
       if (manager.authenticated) {
-        UI.USER_INFO.innerText = JSON.stringify(manager.user, null, 2);
-        UI.SIGN_OUT.style.display = 'block';
+          UI.USER_INFO.innerText = `Welcome, ${manager.user.name}!`;
+          UI.SIGN_OUT.style.display = 'block';
+	  UI.CANVAS.style.display = 'block';
+	  const token_as_str = localStorage.getItem(`${client_id}:${collection}`);
+          const token_json = JSON.parse(token_as_str);
+	  const access_token = token_json['access_token'];
+	  
+	  var request = new XMLHttpRequest();
+	  request.onreadystatechange = function() {
+	      if (this.readyState == 4 && this.status == 200) {
+		  const data = JSON.parse(request.responseText);
+
+		  /* https://www.chartjs.org/docs/latest/getting-started/ */
+		  new Chart(UI.CHART, {
+		      type: 'bar',
+		      options: {
+			  animation: false,
+			  plugins: {
+			      legend: {
+				  display: false
+			      },
+			      tooltip: {
+				  enabled: false
+			      }
+			  }
+		      },
+		      data: {
+			  labels: data.map(row => row.year),
+			  datasets: [
+			      {
+				  label: 'Acquisitions by year',
+				  data: data.map(row => row.count)
+			      }
+			  ]
+		      }
+		  }
+			   );
+	      }
+	  };
+	  request.open("GET", data_url, true);
+	  request.setRequestHeader('Authorization', `Bearer ${access_token}`);
+	  request.send(); 	  
       } else {
-        UI.SIGN_IN.style.display = 'block';
+          UI.SIGN_IN.style.display = 'block';
+	  UI.CHART.style.display = 'none';
+	  UI.CANVAS.style.display = 'none';
       }
     </script>
   </body>
