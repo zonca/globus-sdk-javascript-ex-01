@@ -130,7 +130,15 @@
 			   );
 	      }
 	  };
-	  request.open("GET", data_url, true);
+          request.onloadend = function() {
+            if(request.status == 403) {
+		console.log('Not authorized for the data, got a 403');
+		UI.USER_INFO.innerText = `${manager.user.name}, you are not authorized to load the data. Did you join the the Serverless Data Users Globus Group?`;
+      		UI.CHART.style.display = 'none';
+		UI.CANVAS.style.display = 'none';
+	    };
+	  };
+          request.open("GET", data_url, true);
 	  request.setRequestHeader('Authorization', `Bearer ${access_token}`);
 	  request.send(); 	  
       } else {
