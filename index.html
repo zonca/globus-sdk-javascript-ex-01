@@ -97,9 +97,6 @@
           UI.USER_INFO.innerText = `Welcome, ${manager.user.name}!`;
           UI.SIGN_OUT.style.display = 'block';
 	  UI.CANVAS.style.display = 'block';
-	  const token_as_str = localStorage.getItem(`${client_id}:${collection}`);
-          const token_json = JSON.parse(token_as_str);
-	  const access_token = token_json['access_token'];
 	  
 	  var request = new XMLHttpRequest();
 	  request.onreadystatechange = function() {
@@ -142,7 +139,7 @@
 	    };
 	  };
           request.open("GET", data_url, true);
-	  request.setRequestHeader('Authorization', `Bearer ${access_token}`);
+	  request.setRequestHeader('Authorization', `Bearer ${manager.tokens.gcs(collection).access_token}`);
 	  request.send(); 	  
       } else {
           UI.SIGN_IN.style.display = 'block';
