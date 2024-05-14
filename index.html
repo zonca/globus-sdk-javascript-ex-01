@@ -24,6 +24,17 @@
       <canvas id="chart"></canvas>
     </div>
 
+    <div style="width: 50%">
+      <h2>How this Works</h2>
+
+      <ol>
+	<li>Research logs in to Globus and Globus Auth returns an OAuth access token which is stored in the browser.</li>
+	<li>Once authenticated, a script in this page requests a JSON file from a Globus collection over HTTPS. Globus checks that the researcher is a member of the <a href="https://app.globus.org/groups/260da91f-3496-11ed-b941-972795fc9504/join">Serverless Data Users Globus Group</a>. If they are, the collection returns the file.</li>
+	<li>When the JSON file is loaded in the browser <a href="https://www.chartjs.org/docs/latest/getting-started/">Chart.js</a> is  used to render the bar chart.</li>
+      </ol>
+      <img src="Architecture.png" style="border: 5px solid #555" height="auto"/>
+    </div>
+    
     <script>
       /* Collection with the restricted data */
       const collection = '385d3079-5121-40bc-a52f-055296497631';
