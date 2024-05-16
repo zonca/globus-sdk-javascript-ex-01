@@ -26,6 +26,7 @@
       <button id="plot" py-click="pandas_plot">Load data and plot</button>
       <div id="chart"></div>
       <p>Plotted using Pandas and Matplotlib via py-script</a>
+      <iframe frameborder="0" scrolling="no" style="width:100%; height:372px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fzonca%2Fglobus-sdk-javascript-ex-01%2Fblob%2Fmain%2Fmain.py&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
     </div>
 
     <div style="width: 50%">
@@ -63,8 +64,9 @@
           /**
            * The redirect URL for your application.
            * This URL should also be added to your Globus Application configuration.
-           */
           redirect: 'https://zonca.github.io/globus-sdk-javascript-ex-01/',
+           */
+          redirect: 'http://localhost:8000',
           /**
            * @todo - This uncovered a bug where you need to define at least one scope, I'll get this fixed so you can remove it!
            */
