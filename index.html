@@ -11,7 +11,7 @@
     <script type="module" src="https://pyscript.net/releases/2024.5.2/core.js"></script>
   </head>
   <body>
-    <h1>@globus/sdk</h1>
+    <h1>Globus Javascript SDK example with PyScript</h1>
     <p>This page demonstrates how to incorporate a <a href="https://g-062a3c.0ed28.75bc.data.globus.org/allusers/data.json">JSON file</a>
       <a href="https://app.globus.org/file-manager?origin_id=385d3079-5121-40bc-a52f-055296497631&origin_path=%2Fallusers%2F">hosted in a Globus Guest Collection</a> with restricted access.
     </p>
@@ -23,10 +23,11 @@
     <code><pre id="user-information"></pre></code>
     <div id="canvas">
       <h2>Sample Chart with Restricted Data</h2>
-      <button id="plot" py-click="pandas_plot">Load data and plot</button>
+      <p>Data is being loaded via Javascript, once completed, the "Plot data" button will be enabled</p>
+      <button id="plot" disabled="true" onclick="(function (){document.getElementById('code-iframe').style.display='block'})();return false;" py-click="pandas_plot">Plot data</button>
       <div id="chart"></div>
       <p>Plotted using Pandas and Matplotlib via py-script</a>
-      <iframe frameborder="0" scrolling="no" style="width:100%; height:372px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fzonca%2Fglobus-sdk-javascript-ex-01%2Fblob%2Fmain%2Fmain.py&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
+      <iframe id="code-iframe" frameborder="0" scrolling="no" style="display:none; width:100%; height:372px;" allow="clipboard-write" src="https://emgithub.com/iframe.html?target=https%3A%2F%2Fgithub.com%2Fzonca%2Fglobus-sdk-javascript-ex-01%2Fblob%2Fmain%2Fmain.py&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on"></iframe>
     </div>
 
     <div style="width: 50%">
@@ -64,9 +65,9 @@
           /**
            * The redirect URL for your application.
            * This URL should also be added to your Globus Application configuration.
-          redirect: 'https://zonca.github.io/globus-sdk-javascript-ex-01/',
-           */
           redirect: 'http://localhost:8000',
+           */
+          redirect: 'https://zonca.github.io/globus-sdk-javascript-ex-01/',
           /**
            * @todo - This uncovered a bug where you need to define at least one scope, I'll get this fixed so you can remove it!
            */
@@ -89,6 +90,7 @@
           SIGN_OUT: document.getElementById('sign-out'),
           USER_INFO: document.getElementById('user-information'),
 	  CANVAS: document.getElementById('canvas'),
+	  PLOT: document.getElementById('plot'),
 	  CHART: document.getElementById('chart'),
       };
 
@@ -120,6 +122,7 @@
 	  request.onreadystatechange = function() {
 	      if (this.readyState == 4 && this.status == 200) {
 		  data = request.responseText;
+		  UI.PLOT.disabled= false;
 	      }
 	  };
           request.onloadend = function() {
@@ -136,6 +139,7 @@
       } else {
           UI.SIGN_IN.style.display = 'block';
 	  UI.CHART.style.display = 'none';
+	  UI.PLOT.style.display = 'none';
 	  UI.CANVAS.style.display = 'none';
       }
     </script>
