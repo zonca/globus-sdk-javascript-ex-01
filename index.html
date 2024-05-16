@@ -23,9 +23,9 @@
     <code><pre id="user-information"></pre></code>
     <div id="canvas">
       <h2>Sample Chart with Restricted Data</h2>
-      <p>Plotted using <a href="https://www.chartjs.org/docs/latest/getting-started/">Chart.js</a>.
       <button id="plot" py-click="pandas_plot">Load data and plot</button>
       <div id="chart"></div>
+      <p>Plotted using Pandas and Matplotlib via py-script</a>
     </div>
 
     <div style="width: 50%">
@@ -34,7 +34,7 @@
       <ol>
 	<li>Research logs in to Globus and Globus Auth returns an OAuth access token which is stored in the browser.</li>
 	<li>Once authenticated, a script in this page requests a JSON file from a Globus collection over HTTPS. Globus checks that the researcher is a member of the <a href="https://app.globus.org/groups/260da91f-3496-11ed-b941-972795fc9504/join">Serverless Data Users Globus Group</a>. If they are, the collection returns the file.</li>
-	<li>When the JSON file is loaded in the browser <a href="https://www.chartjs.org/docs/latest/getting-started/">Chart.js</a> is  used to render the bar chart.</li>
+	<li>When the JSON file is loaded in the browser through the Globus api via Javascript, the resulting JSON string is passed to Python via Py-Script, turned into a `pandas.DataFrame` and plotted.</li>
       </ol>
     </div>
 
@@ -117,7 +117,7 @@
 	  var request = new XMLHttpRequest();
 	  request.onreadystatechange = function() {
 	      if (this.readyState == 4 && this.status == 200) {
-		  const data = JSON.parse(request.responseText);
+		  data = request.responseText;
 	      }
 	  };
           request.onloadend = function() {
