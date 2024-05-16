@@ -6,6 +6,9 @@
     <title>@globus/sdk Demo</title>
     <script src="https://unpkg.com/@globus/sdk/umd/globus.production.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.5.2/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.5.2/core.js"></script>
   </head>
   <body>
     <h1>@globus/sdk</h1>
@@ -114,32 +117,7 @@
 	  request.onreadystatechange = function() {
 	      if (this.readyState == 4 && this.status == 200) {
 		  const data = JSON.parse(request.responseText);
-
-		  /* https://www.chartjs.org/docs/latest/getting-started/ */
-		  new Chart(UI.CHART, {
-		      type: 'bar',
-		      options: {
-			  animation: false,
-			  plugins: {
-			      legend: {
-				  display: false
-			      },
-			      tooltip: {
-				  enabled: false
-			      }
-			  }
-		      },
-		      data: {
-			  labels: data.map(row => row.year),
-			  datasets: [
-			      {
-				  label: 'Acquisitions by year',
-				  data: data.map(row => row.count)
-			      }
-			  ]
-		      }
-		  }
-			   );
+		  pandas_plot_js();
 	      }
 	  };
           request.onloadend = function() {
@@ -159,5 +137,8 @@
 	  UI.CANVAS.style.display = 'none';
       }
     </script>
+    <section class="pyscript">
+        <script type="py" src="./main.py" config="./pyscript.toml"></script>
+    </section>
   </body>
 </html>
